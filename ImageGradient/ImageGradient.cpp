@@ -8,6 +8,7 @@
 #include <cmath>
 
 #define UNKNOWN_FLOW_THRESH 1e9
+#define PI 3.14159265359
 
 using namespace std;
 using namespace cv;
@@ -76,7 +77,7 @@ int main()
 			amplitude = sqrt(pow(gradient.at<Vec2f>(i, j)[1], 2) + pow(gradient.at<Vec2f>(i, j)[0], 2));
 			if ((theta >= 0.0f && theta <45.0f) || (theta >=180.0f && theta <225.0f))
 			{
-				alpha = tan(theta);
+				alpha = tan(theta* PI / 180.0);
 				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 2)[1], 2));
 				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j + 2)[1], 2));
 				B1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j)[1], 2));
@@ -96,7 +97,7 @@ int main()
 			}
 			else if((theta >= 45.0f && theta <90.0f) || (theta >= 225.0f && theta <270.0f))
 			{
-				alpha = tan(90.0f - theta);
+				alpha = tan((90.0f - theta)* PI / 180.0);
 				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 1)[1], 2));
 				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j + 2)[1], 2));
 				B1 = sqrt(pow(compareGradient.at<Vec2f>(i, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i, j + 1)[1], 2));
@@ -116,7 +117,7 @@ int main()
 			}
 			else if ((theta >= 90.0f && theta <135.0f) || (theta >= 270.0f && theta <315.0f))
 			{
-				alpha = tan(theta - 90.0f);
+				alpha = tan((theta - 90.0f)* PI / 180.0);
 				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 1)[1], 2));
 				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j)[1], 2));
 				B1 = sqrt(pow(compareGradient.at<Vec2f>(i, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i, j + 1)[1], 2));
@@ -136,7 +137,7 @@ int main()
 			}
 			else if ((theta >= 135.0f && theta <180.0f) || (theta >= 315.0f && theta <360.0f))
 			{
-				alpha = tan(180.0f - theta);
+				alpha = tan((180.0f - theta)* PI / 180.0);
 				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j)[1], 2));
 				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j)[1], 2));
 				B1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 2)[1], 2));
