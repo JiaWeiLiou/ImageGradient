@@ -26,8 +26,9 @@ int main()
 	int pos2 = infile.find_last_of('.');
 	string filepath(infile.substr(0, pos1));
 	string infile_name(infile.substr(pos1 + 1, pos2 - pos1 - 1));
-	string gradientoutfile;
-	gradientoutfile = filepath + "\\" + infile_name + "_Gradient.JPG";
+	string gradientoutfile, nonMaximumSuppressionoutfile;
+	gradientoutfile = filepath + "\\" + infile_name + "_Gradient.png";
+	nonMaximumSuppressionoutfile = filepath + "\\" + infile_name + "_NonMax.png";
 
 	// 載入原圖  
 	Mat srcImage = imread(infile, 0);
@@ -45,14 +46,120 @@ int main()
 	for (int i = 0; i < srcImage.rows; ++i)
 		for (int j = 0; j < srcImage.cols; ++j)
 		{
-			gradient.at<Vec2f>(i, j)[0] = (double)grad_x.at<short>(i, j);
-			gradient.at<Vec2f>(i, j)[1] = (double)grad_y.at<short>(i, j);
+			gradient.at<Vec2f>(i, j)[0] = -(double)grad_x.at<short>(i, j);
+			gradient.at<Vec2f>(i, j)[1] = -(double)grad_y.at<short>(i, j);
 		}
 
 	Mat ColorGradientImage;
 	int radius = 255;
 	drawMunsellColorSystem(gradient, ColorGradientImage, radius);
 	imwrite(gradientoutfile, ColorGradientImage);
+
+	/*非最大值抑制*/
+	Mat compareGradient;
+	copyMakeBorder(gradient, compareGradient, 1, 1, 1, 1, BORDER_CONSTANT, Scalar(0.0f, 0.0f));
+	Mat nonMaximumSuppression = Mat(srcImage.size(), CV_32FC2);
+	float theta = 0.0f;			//目前像素的方向
+	float amplitude = 0.0f;		//目前像素的幅值
+	float amplitude1 = 0.0f;	//鄰域像素1的幅值
+	float amplitude2 = 0.0f;	//鄰域像素2的幅值
+	float A1 = 0.0f;
+	float A2 = 0.0f;
+	float B1 = 0.0f;
+	float B2 = 0.0f;
+	float alpha = 0.0f;
+
+	for (int i = 0; i < gradient.rows; ++i)
+		for (int j = 0; j < gradient.cols; ++j)
+		{
+			theta = fastAtan2(gradient.at<Vec2f>(i, j)[1], gradient.at<Vec2f>(i, j)[0]);
+			amplitude = sqrt(pow(gradient.at<Vec2f>(i, j)[1], 2) + pow(gradient.at<Vec2f>(i, j)[0], 2));
+			if ((theta >= 0.0f && theta <45.0f) || (theta >=180.0f && theta <225.0f))
+			{
+				alpha = tan(theta);
+				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 2)[1], 2));
+				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j + 2)[1], 2));
+				B1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j)[1], 2));
+				B2 = sqrt(pow(compareGradient.at<Vec2f>(i, j)[0], 2) + pow(compareGradient.at<Vec2f>(i, j)[1], 2));
+				amplitude1 = A1*(1 - alpha) + A2*alpha;
+				amplitude2 = B1*(1 - alpha) + B2*alpha;
+				if (amplitude > amplitude1 && amplitude > amplitude2)
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = gradient.at<Vec2f>(i, j)[0];
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = gradient.at<Vec2f>(i, j)[1];
+				}
+				else
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = 0.0f;
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = 0.0f;
+				}
+			}
+			else if((theta >= 45.0f && theta <90.0f) || (theta >= 225.0f && theta <270.0f))
+			{
+				alpha = tan(90.0f - theta);
+				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 1)[1], 2));
+				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j + 2)[1], 2));
+				B1 = sqrt(pow(compareGradient.at<Vec2f>(i, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i, j + 1)[1], 2));
+				B2 = sqrt(pow(compareGradient.at<Vec2f>(i, j)[0], 2) + pow(compareGradient.at<Vec2f>(i, j)[1], 2));
+				amplitude1 = A1*(1 - alpha) + A2*alpha;
+				amplitude2 = B1*(1 - alpha) + B2*alpha;
+				if (amplitude > amplitude1 && amplitude > amplitude2)
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = gradient.at<Vec2f>(i, j)[0];
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = gradient.at<Vec2f>(i, j)[1];
+				}
+				else
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = 0.0f;
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = 0.0f;
+				}
+			}
+			else if ((theta >= 90.0f && theta <135.0f) || (theta >= 270.0f && theta <315.0f))
+			{
+				alpha = tan(theta - 90.0f);
+				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 1)[1], 2));
+				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j)[1], 2));
+				B1 = sqrt(pow(compareGradient.at<Vec2f>(i, j + 1)[0], 2) + pow(compareGradient.at<Vec2f>(i, j + 1)[1], 2));
+				B2 = sqrt(pow(compareGradient.at<Vec2f>(i, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i, j + 2)[1], 2));
+				amplitude1 = A1*(1 - alpha) + A2*alpha;
+				amplitude2 = B1*(1 - alpha) + B2*alpha;
+				if (amplitude > amplitude1 && amplitude > amplitude2)
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = gradient.at<Vec2f>(i, j)[0];
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = gradient.at<Vec2f>(i, j)[1];
+				}
+				else
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = 0.0f;
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = 0.0f;
+				}
+			}
+			else if ((theta >= 135.0f && theta <180.0f) || (theta >= 315.0f && theta <360.0f))
+			{
+				alpha = tan(180.0f - theta);
+				A1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j)[1], 2));
+				A2 = sqrt(pow(compareGradient.at<Vec2f>(i + 2, j)[0], 2) + pow(compareGradient.at<Vec2f>(i + 2, j)[1], 2));
+				B1 = sqrt(pow(compareGradient.at<Vec2f>(i + 1, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i + 1, j + 2)[1], 2));
+				B2 = sqrt(pow(compareGradient.at<Vec2f>(i, j + 2)[0], 2) + pow(compareGradient.at<Vec2f>(i, j + 2)[1], 2));
+				amplitude1 = A1*(1 - alpha) + A2*alpha;
+				amplitude2 = B1*(1 - alpha) + B2*alpha;
+				if (amplitude > amplitude1 && amplitude > amplitude2)
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = gradient.at<Vec2f>(i, j)[0];
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = gradient.at<Vec2f>(i, j)[1];
+				}
+				else
+				{
+					nonMaximumSuppression.at<Vec2f>(i, j)[0] = 0.0f;
+					nonMaximumSuppression.at<Vec2f>(i, j)[1] = 0.0f;
+				}
+			}
+
+		}
+
+	Mat ColorNonMaximumSuppression;
+	drawMunsellColorSystem(nonMaximumSuppression, ColorNonMaximumSuppression, radius);
+	imwrite(nonMaximumSuppressionoutfile, ColorNonMaximumSuppression);
 
     return 0;
 }
