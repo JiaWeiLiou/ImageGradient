@@ -395,7 +395,7 @@ void HysteresisThreshold(InputArray _NMSgradientField_abs, OutputArray _HTedge, 
 
 	Mat labelImg;
 	int labelNum = bwlabel(MT, labelImg);
-
+	labelNum = labelNum + 1;	// include label 0
 	int* labeltable = new int[labelNum];		// initialize label table with zero  
 	memset(labeltable, 0, labelNum * sizeof(int));
 
