@@ -42,6 +42,10 @@ int main()
 	Mat gradientField;	//結合水平及垂直方向梯度為梯度場
 	GradientField(grad_x, grad_y, gradientField);
 
+	Mat gradient_mag;		//計算梯度幅值(>0)
+	Mat gradient_dir;		//計算梯度方向(0-360)
+	CalculateGradient(gradientField, gradient_mag, gradient_dir);
+
 	Mat gradientImage_col;		//輸出用色環梯度場
 	DrawMunsellColorSystem(gradientField, gradientImage_col);
 	string gradOutfile_col = filepath + "\\" + infilename + "_GRAD(color).png";		//梯度場(色環)
@@ -66,6 +70,19 @@ int main()
 	DrawAbsGraySystem(NMSgradientField, NMSgradientField_abs);
 	string nmsOutfile_abs = filepath + "\\" + infilename + "_NMS(abs).png";			//非極大值抑制(絕對值)
 	imwrite(nmsOutfile_abs, NMSgradientField_abs);
+
+	//test
+	Mat UT;		//上閥值二值化
+	threshold(NMSgradientField_abs, UT, 30, 255, THRESH_BINARY);
+	Mat label;
+	int num = bwlabel(UT, label);
+
+	/*滯後閥值*/
+	Mat HTedge;
+	HysteresisThreshold(NMSgradientField_abs, HTedge, 80, 40);
+
+	string atOutfile = filepath + "\\" + infilename + "_HT.png";		//非極大值抑制(色環)
+	imwrite(atOutfile, HTedge);
 
     return 0;
 }
