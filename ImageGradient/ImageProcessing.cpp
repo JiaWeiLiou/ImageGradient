@@ -53,6 +53,8 @@ void DrawMunsellColorSystem(InputArray _field, OutputArray _colorField)
 		}
 	}
 
+	maxrad = 255;
+
 	for (int i = 0; i < field.rows; ++i)
 	{
 		for (int j = 0; j < field.cols; ++j)
@@ -124,6 +126,48 @@ void DrawAbsGraySystem(InputArray _field, OutputArray _grayField)
 			float absvalue = sqrt(fx * fx + fy * fy);
 			grayField.at<uchar>(i, j) = (char)(absvalue*255.0f / maxvalue);
 		}
+}
+
+void DrawEdgeSystem(InputArray _edge, InputArray _field, OutputArray _edgeField)
+{
+	Mat edge = _edge.getMat();
+	CV_Assert(edge.type() == CV_8UC1);
+
+	Mat field = _field.getMat();
+
+	if (field.type() == CV_8UC1) 
+	{
+		_edgeField.create(field.size(), CV_8UC1);
+		Mat edgeField = _edgeField.getMat();
+
+		for (int i = 0; i < edge.rows; i++)
+			for (int j = 0; j < edge.cols; j++)
+				if (edge.at<uchar>(i, j) == 255)
+					edgeField.at<uchar>(i, j) = field.at<uchar>(i, j);
+				else
+					edgeField.at<uchar>(i, j) = 0;
+
+	}
+	else if (field.type() == CV_8UC3)
+	{
+		_edgeField.create(field.size(), CV_8UC3);
+		Mat edgeField = _edgeField.getMat();
+
+		for (int i = 0; i < edge.rows; i++)
+			for (int j = 0; j < edge.cols; j++)
+				if (edge.at<uchar>(i, j) == 255)
+				{
+					edgeField.at<Vec3b>(i, j)[0] = field.at<Vec3b>(i, j)[0];
+					edgeField.at<Vec3b>(i, j)[1] = field.at<Vec3b>(i, j)[1];
+					edgeField.at<Vec3b>(i, j)[2] = field.at<Vec3b>(i, j)[2];
+				}
+				else
+				{
+					edgeField.at<Vec3b>(i, j)[0] = 255;
+					edgeField.at<Vec3b>(i, j)[1] = 255;
+					edgeField.at<Vec3b>(i, j)[2] = 255;
+				}
+	}
 }
 
 void Differential(InputArray _src, OutputArray _grad_x, OutputArray _grad_y) {
@@ -293,9 +337,7 @@ int bwlabel(InputArray _binaryImg, OutputArray _labels)
 	//+ - + - + - +
 
 	for (int i = 0; i < binaryImg.rows; i++)
-	{
 		for (int j = 0; j < binaryImg.cols; j++)
-		{
 			if (binaryImg.at<uchar>(i, j) == 255)   // if A is an object  
 			{
 				// get the neighboring labels B, C, D, and E
@@ -333,8 +375,7 @@ int bwlabel(InputArray _binaryImg, OutputArray _labels)
 				else { labels.at<int>(i, j) = labeltable[ntable] = ++ntable; } // label and put into table  
 			}
 			else { labels.at<int>(i, j) = 0; }	// A is not an object so leave it
-		}
-	}
+
 	// consolidate component table  
 	for (int i = 0; i <= ntable; i++)
 		labeltable[i] = findroot(labeltable, i);

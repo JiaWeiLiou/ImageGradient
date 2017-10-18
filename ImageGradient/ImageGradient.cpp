@@ -79,10 +79,19 @@ int main()
 
 	/*滯後閥值*/
 	Mat HTedge;
-	HysteresisThreshold(NMSgradientField_abs, HTedge, 80, 40);
-
-	string atOutfile = filepath + "\\" + infilename + "_HT.png";		//非極大值抑制(色環)
+	HysteresisThreshold(NMSgradientField_abs, HTedge, 80, 10);
+	string atOutfile = filepath + "\\" + infilename + "_HT.png";		//滯後閥值(二值化)
 	imwrite(atOutfile, HTedge);
+
+	Mat HTedge_col;
+	DrawEdgeSystem(HTedge, gradientImage_col, HTedge_col);
+	string atOutfile_col = filepath + "\\" + infilename + "_HT(col).png";		//滯後閥值(色環)
+	imwrite(atOutfile_col, HTedge_col);
+
+	Mat HTedge_abs;
+	DrawEdgeSystem(HTedge, gradientImage_abs, HTedge_abs);
+	string atOutfile_abs = filepath + "\\" + infilename + "_HT(abs).png";		//滯後閥值(絕對值)
+	imwrite(atOutfile_abs, HTedge_abs);
 
     return 0;
 }

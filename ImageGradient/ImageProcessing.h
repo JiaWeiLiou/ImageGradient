@@ -12,6 +12,9 @@ void DrawMunsellColorSystem(InputArray _field, OutputArray _colorField);
 /*將圖片轉以絕對值灰度顯示*/
 void DrawAbsGraySystem(InputArray _field, OutputArray _grayField);
 
+/*以邊緣偵測結果顯示色環或灰度值*/
+void DrawEdgeSystem(InputArray _edge, InputArray _field, OutputArray _edgeField);
+
 /*計算水平及垂直方向梯度*/
 void Differential(InputArray _src, OutputArray _grad_x, OutputArray _grad_y);
 
