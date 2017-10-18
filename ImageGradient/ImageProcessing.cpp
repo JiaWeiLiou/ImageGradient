@@ -170,6 +170,102 @@ void DrawEdgeSystem(InputArray _edge, InputArray _field, OutputArray _edgeField)
 	}
 }
 
+void DrawAbsGraySystemAtImage(InputArray _edge, InputArray _realImage, OutputArray _combineImage, int weight)
+{
+	Mat edge = _edge.getMat();
+	CV_Assert(edge.type() == CV_8UC1);
+
+	Mat realImage = _realImage.getMat();
+
+	 // weight ¥[Åv
+
+	if (realImage.type() == CV_8UC1)
+	{
+		_combineImage.create(realImage.size(), CV_8UC3);
+		Mat combineImage = _combineImage.getMat();
+
+		for (int i = 0; i < edge.rows; i++)
+			for (int j = 0; j < edge.cols; j++)
+				{
+					combineImage.at<Vec3b>(i, j)[0] = realImage.at<uchar>(i, j);
+					combineImage.at<Vec3b>(i, j)[1] = realImage.at<uchar>(i, j);
+					if (realImage.at<uchar>(i, j) + edge.at<uchar>(i, j)*weight > 255)
+						combineImage.at<Vec3b>(i, j)[2] = 255;
+					else
+						combineImage.at<Vec3b>(i, j)[2] = realImage.at<uchar>(i, j) + edge.at<uchar>(i, j)*weight;
+				}
+	}
+	else if (realImage.type() == CV_8UC3)
+	{
+		_combineImage.create(realImage.size(), CV_8UC3);
+		Mat combineImage = _combineImage.getMat();
+
+		for (int i = 0; i < edge.rows; i++)
+			for (int j = 0; j < edge.cols; j++)
+				{
+					combineImage.at<Vec3b>(i, j)[0] = realImage.at<Vec3b>(i, j)[0];
+					combineImage.at<Vec3b>(i, j)[1] = realImage.at<Vec3b>(i, j)[1];
+					if (realImage.at<Vec3b>(i, j)[2] + edge.at<uchar>(i, j)*weight > 255)
+						combineImage.at<Vec3b>(i, j)[2] = 255;
+					else
+						combineImage.at<Vec3b>(i, j)[2] = realImage.at<Vec3b>(i, j)[2] + edge.at<uchar>(i, j)*weight;
+				}
+	}
+}
+
+void DrawEdgeSystemAtImage(InputArray _edge, InputArray _realImage, OutputArray _combineImage)
+{
+	Mat edge = _edge.getMat();
+	CV_Assert(edge.type() == CV_8UC1);
+
+	Mat realImage = _realImage.getMat();
+
+	if (realImage.type() == CV_8UC1)
+	{
+		_combineImage.create(realImage.size(), CV_8UC3);
+		Mat combineImage = _combineImage.getMat();
+
+		for (int i = 0; i < edge.rows; i++)
+			for (int j = 0; j < edge.cols; j++)
+			{
+				if (edge.at<uchar>(i, j) == 255)
+				{
+					combineImage.at<Vec3b>(i, j)[0] = 0;
+					combineImage.at<Vec3b>(i, j)[1] = 0;
+					combineImage.at<Vec3b>(i, j)[2] = 255;
+				}
+				else
+				{
+					combineImage.at<Vec3b>(i, j)[0] = realImage.at<uchar>(i, j);
+					combineImage.at<Vec3b>(i, j)[1] = realImage.at<uchar>(i, j);
+					combineImage.at<Vec3b>(i, j)[2] = realImage.at<uchar>(i, j);
+				}
+			}
+	}
+	else if (realImage.type() == CV_8UC3)
+	{
+		_combineImage.create(realImage.size(), CV_8UC3);
+		Mat combineImage = _combineImage.getMat();
+
+		for (int i = 0; i < edge.rows; i++)
+			for (int j = 0; j < edge.cols; j++)
+			{
+				if (edge.at<uchar>(i, j) == 255)
+				{
+					combineImage.at<Vec3b>(i, j)[0] = 0;
+					combineImage.at<Vec3b>(i, j)[1] = 0;
+					combineImage.at<Vec3b>(i, j)[2] = 255;
+				}
+				else
+				{
+					combineImage.at<Vec3b>(i, j)[0] = realImage.at<Vec3b>(i, j)[0];
+					combineImage.at<Vec3b>(i, j)[1] = realImage.at<Vec3b>(i, j)[1];
+					combineImage.at<Vec3b>(i, j)[2] = realImage.at<Vec3b>(i, j)[2];
+				}
+			}
+	}
+}
+
 void Differential(InputArray _src, OutputArray _grad_x, OutputArray _grad_y) {
 
 	Mat src = _src.getMat();

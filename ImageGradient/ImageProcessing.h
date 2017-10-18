@@ -12,8 +12,14 @@ void DrawMunsellColorSystem(InputArray _field, OutputArray _colorField);
 /*將圖片轉以絕對值灰度顯示*/
 void DrawAbsGraySystem(InputArray _field, OutputArray _grayField);
 
-/*以邊緣偵測結果顯示色環或灰度值*/
+/*將邊緣偵測結果顯示色環或灰度值*/
 void DrawEdgeSystem(InputArray _edge, InputArray _field, OutputArray _edgeField);
+
+/*將絕對值灰度顯示在實際圖像上*/
+void DrawAbsGraySystemAtImage(InputArray _edge, InputArray _realImage, OutputArray _combineImage, int weight);
+
+/*將邊緣偵測結果顯示在實際圖像上*/
+void DrawEdgeSystemAtImage(InputArray _edge, InputArray _realImage, OutputArray _combineImage);
 
 /*計算水平及垂直方向梯度*/
 void Differential(InputArray _src, OutputArray _grad_x, OutputArray _grad_y);

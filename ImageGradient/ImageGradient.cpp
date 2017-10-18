@@ -56,6 +56,11 @@ int main()
 	string gradOutfile_abs = filepath + "\\" + infilename + "_GRAD(abs).png";		//梯度場(絕對值)
 	imwrite(gradOutfile_abs, gradientImage_abs);
 
+	Mat gradientImage_com;		//輸出用疊合梯度場
+	DrawAbsGraySystemAtImage(gradientImage_abs, srcImage, gradientImage_com, 2);
+	string gradOutfile_com = filepath + "\\" + infilename + "_GRAD(com).png";		//梯度場(疊合)
+	imwrite(gradOutfile_com, gradientImage_com);
+
 	/*非極大值抑制*/
 
 	Mat NMSgradientField;
@@ -71,27 +76,32 @@ int main()
 	string nmsOutfile_abs = filepath + "\\" + infilename + "_NMS(abs).png";			//非極大值抑制(絕對值)
 	imwrite(nmsOutfile_abs, NMSgradientField_abs);
 
-	//test
-	Mat UT;		//上閥值二值化
-	threshold(NMSgradientField_abs, UT, 30, 255, THRESH_BINARY);
-	Mat label;
-	int num = bwlabel(UT, label);
+	Mat NMSgradientField_com;		//輸出用非最大值抑制疊合梯度場
+	DrawAbsGraySystemAtImage(NMSgradientField_abs, srcImage, NMSgradientField_com, 3);
+	string nmsOutfile_com = filepath + "\\" + infilename + "_NMS(com).png";		//非極大值抑制(疊合)
+	imwrite(nmsOutfile_com, NMSgradientField_com);
 
 	/*滯後閥值*/
+
 	Mat HTedge;
 	HysteresisThreshold(NMSgradientField_abs, HTedge, 80, 10);
 	string atOutfile = filepath + "\\" + infilename + "_HT.png";		//滯後閥值(二值化)
 	imwrite(atOutfile, HTedge);
 
-	Mat HTedge_col;
+	Mat HTedge_col;					//輸出用滯後閥值色環梯度場
 	DrawEdgeSystem(HTedge, gradientImage_col, HTedge_col);
 	string atOutfile_col = filepath + "\\" + infilename + "_HT(col).png";		//滯後閥值(色環)
 	imwrite(atOutfile_col, HTedge_col);
 
-	Mat HTedge_abs;
+	Mat HTedge_abs;					//輸出用滯後閥值絕對值梯度場
 	DrawEdgeSystem(HTedge, gradientImage_abs, HTedge_abs);
 	string atOutfile_abs = filepath + "\\" + infilename + "_HT(abs).png";		//滯後閥值(絕對值)
 	imwrite(atOutfile_abs, HTedge_abs);
 
-    return 0;
+	Mat HTedge_com;		//輸出用滯後閥值疊合梯度場
+	DrawEdgeSystemAtImage(HTedge, srcImage, HTedge_com);
+	string atOutfile_com = filepath + "\\" + infilename + "_HT(com).png";		//滯後閥值(疊合)
+	imwrite(atOutfile_com, HTedge_com);
+
+	return 0;
 }
